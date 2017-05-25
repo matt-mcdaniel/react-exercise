@@ -1,5 +1,6 @@
+# React Exercise
 
-# Create two lists of dog people, cat people,
+## Create two lists: dog people, cat people
 ## Show lists anywhere
-## Reuse UserInfo component,
-## Allow deleting individual user from dogPeople/catPeople list
+## Reuse UserInfo component
+## Allow deleting individual user from dog people/cat people lists
