@@ -1,83 +1,129 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
 const dogStyle = {
-    color: 'brown'
-};
+	color: 'brown'
+}
 
 const catStyle = {
-    color: 'blue'
-};
+	color: 'blue'
+}
 
+// Show user info
 const UserInfo = props => {
-    const user = props.user;
+	const user = props.user;
 
-    return (
-        <div>
-            <img src={user.picture.large} />
-            <div>
-                {user.name.first + ' ' + user.name.last}
-            </div>
-        </div>
-    );
-};
+	return (
+		<div>
+			<img src={user.picture.large} />
+
+			<div>
+				{user.name.first + ' ' + user.name.last}
+			</div>
+		</div>
+	)
+}
+
+// List Dog and Cat people
+const UserList = props => {
+	const users = props.users;
+	const removeUser = props.handler;
+
+	return (
+		<div>
+			<h2>
+				{props.list} People
+			</h2>
+
+			<ul>
+				{
+					users.map(function(user, index) {
+						return (
+							<li>
+								<UserInfo user={user} />
+								<a onClick={() => removeUser(index, props.list)}>
+									X
+								</a>
+							</li>
+						)
+					})
+				}
+			</ul>
+		</div>
+	)
+}
 
 class App extends Component {
-    state = {
-        user: null,
-        dogPeople: [],
-        catPeople: []
-    };
 
-    getUserData = () => {
-        fetch('https://randomuser.me/api/')
-            .then(data => data.json())
-            .then(data => {
-                this.setState({
-                    user: data.results[0]
-                });
-            })
-            .catch(e => {
-                this.setState({error: e});
-            });
-    };
+	state = {
+		number: 25,
+		dogPeople: [],
+		catPeople: [],
+	};
 
-    handlePetSelect = pet => {
-        /**
-         * Create two lists of dog people, cat people,
-         * show lists anywhere,
-         * reuse UserInfo component,
-         * allow deleting individual user from dogPeople/catPeople list
-         */
-        console.log(pet);
+	getUserData = () => {
+		fetch('https://randomuser.me/api/')
+			.then(data => data.json())
+			.then(data => {
+				this.setState({
+					user: data.results[0]
+				});
+			});
+	};
 
-        this.getUserData();
-    };
+	handlePetSelect = pet => {
+		// Log user into pet array
+		this.setState({
+			[pet + 'People']: this.state[pet + 'People'].concat({
+				name: this.state.user.name,
+				picture: this.state.user.picture,
+				pet: pet,
+			})
+		});
 
-    componentDidMount() {
-        this.getUserData();
-    }
+		// Reset to new user
+		this.getUserData();
+	}
 
-    render() {
-        const {user} = this.state;
+	removeUser = (index, list) => {
+		let newData = this.state[list + 'People'].slice(); //copy array
+		newData.splice(index, 1); //remove element
+		this.setState({[list + 'People']: newData}); //update state
+	};
 
-        if (!user) {
-            return <div>No User Found</div>;
-        }
+	componentDidMount() {
+		this.getUserData();
+	};
 
-        return (
-            <div>
-                <h3 onClick={() => this.handlePetSelect('dog')} style={dogStyle}>
-                    Dog Person
-                </h3>
-                <h3 onClick={() => this.handlePetSelect('cat')} style={catStyle}>
-                    Cat Person
-                </h3>
-                <UserInfo user={user} />
-            </div>
-        );
-    }
+	render() {
+		const {user} = this.state;
+
+		if (!this.state.user) {
+			return <div>No User Found</div>;
+		}
+		return (
+			<div>
+				<h3
+					onClick={() => this.handlePetSelect('dog')}
+					style={dogStyle}>
+					Dog Person
+				</h3>
+
+				<h3
+					onClick={() => this.handlePetSelect('cat')}
+					style={catStyle}>
+					Cat Person
+				</h3>
+
+				<UserInfo user={user} />
+
+				<UserList list="dog" users={this.state.dogPeople} handler={this.removeUser} />
+
+				<UserList list="cat" users={this.state.catPeople} handler={this.removeUser} />
+			</div>
+		);
+	}
 }
 
 export default App;
